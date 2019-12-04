@@ -1,103 +1,83 @@
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.awt.event.*;
-import javax.swing.*;
-import java.awt.*;
+package nov18;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
-
-public class ChatWindow extends JFrame{
-
-    public static JFrame frame; //window
-    public static JPanel panel; //displays the components on the window
+public class ChatWindow extends JFrame {
+    public static JFrame frame;
+    public static JPanel panel;
     public static JTextArea conversation;
-    public static JButton send, close, receive;
+    public static JButton send;
+    public static JButton close;
+    //public static JButton receive;
     public static JTextArea typehere;
-    public static JScrollPane scroll, scroll2;
+    public static JScrollPane scroll;
+    public static JScrollPane scroll2;
     private InetAddress ip;
     private int port;
 
-
-    public ChatWindow(Socket connect, InetAddress ip, int port) //constructor of the class
-    {
-
-        try{
+    public ChatWindow(final Socket connect, final InetAddress ip, final int port) {
+        try {
             this.ip = InetAddress.getLocalHost();
-        } catch (Exception a) {
-            a.printStackTrace();
+        } catch (Exception var5) {
+            var5.printStackTrace();
             System.exit(-1);
         }
 
         this.port = 64000;
-
-        typehere = new JTextArea(5,30);
+        typehere = new JTextArea(5, 30);
         typehere.setVisible(true);
         typehere.setBackground(Color.WHITE);
         typehere.setLineWrap(true);
-
-        conversation = new JTextArea(40,80);
+        conversation = new JTextArea(40, 80);
         conversation.setEditable(false);
         conversation.setLineWrap(true);
-
         scroll = new JScrollPane(conversation);
         scroll2 = new JScrollPane(typehere);
-
-
         close = new JButton("Close");
-        close.addActionListener(new ActionListener(){
-            public void actionPerformed (ActionEvent e){
-                frame.dispose();
-            }
-        });
-        send = new JButton("Send"); //declaring the button
-        send.addActionListener(new ActionListener() {
-            @Override
+        close.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Driver.message = typehere.getText().trim();
-                //Driver.socket.send(Driver.message, Driver.myAddress, 64000);
-                InetAddress destination = null;
-                conversation.append("You: " + Driver.message + "\n sent to: " + ip + "  port # " + port + "\n");
-
-                destination = ip;
-                connect.send(Driver.message,destination, port);
-                typehere.setText(" ");
+                ChatWindow.frame.dispose();
             }
         });
-
-
-
-        //label = new JLabel("Messages"); //declaring the label
+        send = new JButton("Send");
+        send.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Driver.message = ChatWindow.typehere.getText().trim();
+                InetAddress destination = null;
+                ChatWindow.conversation.append("You: " + Driver.message + "\n sent to: " + ip + "  port # " + port + "\n");
+                destination = ip;
+                connect.send(Driver.message, destination, port);
+                ChatWindow.typehere.setText(" ");
+            }
+        });
         panel = new JPanel();
         panel.setLayout(new FlowLayout());
-        panel.setBackground(Color.DARK_GRAY); //picks the color background
-        panel.add(typehere, BorderLayout.WEST);
-        panel.add(send); //adding button to panel
+        panel.setBackground(Color.DARK_GRAY);
+        panel.add(typehere, "West");
+        panel.add(send);
         panel.add(close);
-        panel.add(scroll, BorderLayout.NORTH);
-        panel.add(scroll2, BorderLayout.CENTER);
-        //conversation.add(scroll);
-        //typehere.add(scroll2);
-
-        //conversation.add(label); //adding label to pane
-
-        frame = new JFrame("IP: [" + ip + "]  " + "Port: [" + port + "]");
-        frame.setSize(700,700);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //programs the close button on the window
+        panel.add(scroll, "North");
+        panel.add(scroll2, "Center");
+        frame = new JFrame("IP: [" + ip + "]  Port: [" + port + "]");
+        frame.setSize(700, 700);
+        frame.setDefaultCloseOperation(2);
         frame.setLayout(new BorderLayout());
-        frame.add(panel,BorderLayout.SOUTH);
-        frame.add(conversation,BorderLayout.CENTER);
+        frame.add(panel, "South");
+        frame.add(conversation, "Center");
         frame.setVisible(true);
-
-
-
     }
 
-    public JTextArea getText(){
-        return this.conversation;
+    public JTextArea getText() {
+        return conversation;
     }
-
 }
-
-
