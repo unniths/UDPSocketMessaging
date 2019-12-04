@@ -1,102 +1,115 @@
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.net.InetAddress;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 public class ChatWindow {
 
-    public static String ipname;
-    public static String prname;
-    public static JTextArea field;
-    public static JTextArea field2;
-    public static Socket socker;
-    public static InetAddress myAddress;
-    public static DatagramPacket packet;
-    public static String message;
+    public static JFrame frame; //window
+    public static JPanel panel; //displays the components on the window
+    public static JTextArea conversation;
+    public static JButton send;
+    public static JButton receive;
+    public static JButton close;
+    public static JTextArea typehere;
+    public static JScrollPane scroll;
+    public static JScrollPane scroll2;
 
-    public ChatWindow(String iptxt, String prtxt) {
 
-        ipname = iptxt;
-        prname = prtxt;
+    public ChatWindow(Socket connect, InetAddress ip, int port) //constructor of the class
+    {
+        Driver.ipname = iptxt;
+        Driver.portname = porttxt;
+        gui();
 
     }
+    public void gui(){ //declaring the method
 
-    public static void main(String[] args) {
+        int port = Integer.parseInt(Driver.portname);
+        Driver.socket = new Socket(port);
+        Driver.myAddress = null;
 
-        int port = Integer.parseInt(prname);
-        socker = new Socket(port);
-        myAddress = null;
-
-        try {
-            myAddress = InetAddress.getByName(ipname);
+        try{
+            Driver.myAddress = InetAddress.getByName(Driver.ipname);
         } catch (Exception a) {
             a.printStackTrace();
             System.exit(-1);
         }
 
-        field = new JTextArea(40, 80);
-        field2 = new JTextArea(10, 80);
-        field.setLineWrap(true);
-        field.setEditable(false);
-        field2.setLineWrap(true);
-        JButton close3 = new JButton("Close");
-        JButton send = new JButton("Send");
-        Sending listener = new Sending();
-        send.addActionListener(listener);
+
+        typehere = new JTextArea(5,30);
+        typehere.setVisible(true);
+        typehere.setBackground(Color.WHITE);
+        typehere.setLineWrap(true);
+
+        conversation = new JTextArea(40,80);
+        conversation.setEditable(false);
+        conversation.setLineWrap(true);
+
+        scroll = new JScrollPane(conversation);
+        scroll2 = new JScrollPane(typehere);
 
 
-
-        JScrollPane scroll = new JScrollPane(field);
-        JScrollPane scroll2 = new JScrollPane(field2);
-
-        JPanel conton = new JPanel();
-        conton.setLayout(new FlowLayout());
-        conton.add(scroll, BorderLayout.NORTH);
-        conton.add(scroll2, BorderLayout.CENTER);
-        conton.add(close3);
-        conton.add(send);
-
-        JFrame wind = new JFrame("IP: [ " + ipname + " ]  " + " Port: [ " + prname + " ] ");
-        wind.setContentPane(conton);
-        wind.setSize(1000, 1000);
-        wind.setLocation(2000, 200);
-        wind.setVisible(true);
-        wind.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-
-    }
-
-    private static class Sending implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-
-
-            packet = socker.receive();
-            if (packet != null) {
-                message = new String(packet.getData());
-                field.append(packet.getAddress() + ": " + message + "\n");
+        close = new JButton("Close");
+        close.addActionListener(new ActionListener(){
+            public void actionPerformed (ActionEvent e){
+                frame.dispose();
             }
-
-            message = field2.getText();
-            socker.send(message, myAddress, 64000);
-            field.append("message: "+message+"\n sent to: "+myAddress+" with port: "+prname+". If you don't receive it, click  the {Send} button again, please.\n \n");
-            field2.setText("");
-
-            packet = socker.receive();
-            if (packet != null) {
-                message = new String(packet.getData());
-                field.append(packet.getAddress() + ": " + message + "\n");
+        });
+        send = new JButton("Send"); //declaring the button
+        send.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Driver.message = typehere.getText();
+                Driver.socket.send(Driver.message, Driver.myAddress, 64000);
+                conversation.append("You: " + Driver.message + "\n sent to: " + Driver.myAddress + "  port # " + Driver.portname + "\n");
+                typehere.setText(" ");
             }
+        });
+        //send.addActionListener(this);
+        /*
+        receive = new JButton("Receive");
+        receive.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                Driver.datagrampacket = Driver.socket.receive();
+                if (Driver.datagrampacket != null) {
+                    Driver.message = new String(Driver.datagrampacket.getData());
+                    conversation.append(Driver.datagrampacket.getAddress() + ":  " + Driver.message + "\n");
+                }
+            }
+        });*/
 
-        }
+
+        //label = new JLabel("Messages"); //declaring the label
+        panel = new JPanel();
+        panel.setLayout(new FlowLayout());
+        panel.setBackground(Color.DARK_GRAY); //picks the color background
+        //panel.add(typehere, BorderLayout.WEST);
+        panel.add(send); //adding button to panel
+        panel.add(receive);
+        panel.add(close);
+        panel.add(scroll, BorderLayout.NORTH);
+        panel.add(scroll2, BorderLayout.CENTER);
+        //conversation.add(scroll);
+        //typehere.add(scroll2);
+
+        //conversation.add(label); //adding label to pane
+
+        frame = new JFrame("IP: [" + Driver.ipname + "]  " + "Port: [" + Driver.portname + "  ]");
+        frame.setSize(700,700);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //programs the close button on the window
+        frame.setLayout(new BorderLayout());
+        frame.add(panel,BorderLayout.SOUTH);
+        frame.add(conversation,BorderLayout.CENTER);
+        frame.setVisible(true);
+
+
+
     }
 
 }
+
+
