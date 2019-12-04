@@ -111,9 +111,9 @@ public class Socket {
                 System.exit(-1);
             }
 
-            String message = new String(inPacket.getData());
+            /*String message = new String(inPacket.getData());
             System.out.println("From IP:" + inPacket.getAddress() + "Port #" + inPacket.getPort());
-            messageQueue.add(inPacket);
+            messageQueue.add(inPacket);*/
 
         } while (receiveThreadShouldKeepRunning);
 
